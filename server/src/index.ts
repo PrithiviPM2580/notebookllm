@@ -7,10 +7,15 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { connectToDatabase } from "./db/connection";
 import { createUser } from "./services/user.service";
 import driveRouter from "./routes/drive.route";
+import noteRouter from "./routes/note.route";
+import { cwd } from "node:process";
+import path from "node:path";
 
 const app = express();
+const currentDir = cwd();
 
 app.use(cors());
+app.use(express.static(path.join(currentDir, "public")));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -93,6 +98,7 @@ app.get("/auth/me", (req: any, res) => {
 });
 
 app.use(driveRouter);
+app.use(noteRouter);
 
 const startServer = async () => {
   try {
