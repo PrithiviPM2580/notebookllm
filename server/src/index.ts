@@ -5,6 +5,8 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { connectToDatabase } from "./db/connection";
+import { createUser } from "./services/user.service";
+import driveRouter from "./routes/drive.route";
 
 const app = express();
 
@@ -42,9 +44,9 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
       callbackURL: process.env.GOOGLE_CALLBACK_URL as string,
     },
-    (accessToken, refreshToken, profile, done) => {
-      console.log("Google profile:", profile);
-      return done(null, profile);
+    async (accessToken, refreshToken, profile, done) => {
+      const user = await createUser(profile, { accessToken, refreshToken });
+      return done(null, user);
     },
   ),
 );
@@ -89,6 +91,8 @@ app.get("/auth/me", (req: any, res) => {
   if (!req.user) return res.status(401).json({ message: "Unauthorized" });
   res.json(req.user);
 });
+
+app.use(driveRouter);
 
 const startServer = async () => {
   try {

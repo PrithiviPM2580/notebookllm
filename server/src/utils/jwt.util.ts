@@ -1,3 +1,4 @@
+import type { Token } from "@/types/index.type";
 import jwt from "jsonwebtoken";
 
 export const jwtPayload = (userId: string) => {
@@ -56,4 +57,16 @@ export const verifyRefreshToken = (token: string) => {
     console.error("Error verifying refresh token:", error);
     return null;
   }
+};
+
+export const generateTokens = async (userId: string): Promise<Token> => {
+  const [accessToken, refreshToken] = await Promise.all([
+    signAccessToken(userId),
+    signRefreshToken(userId),
+  ]);
+
+  return {
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+  };
 };
